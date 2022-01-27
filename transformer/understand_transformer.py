@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score
 
 
 # self-attention
@@ -23,18 +24,16 @@ y = torch.mm(w_ij, x)
 print('y is \n', y)
 
 
-# dot product 代表了其他各个任务与当前任务的相关性
-# 置换不变！！！相当于每个点都考虑全面的信息，没有遗漏，必然是不变的
+# dot product: 计算q样本和每个k样本的相关性【compatibility】
+# permute invariant！！！相当于每个点都考虑全面的信息，没有遗漏，必然是不变的【用于点云处理】
 
-# 最新的transformer实际使用的技巧
-
-# 1. 查询q、键k、值v
-# 添加三个dxd的矩阵, 用于计算self-attention的三个不同部分(q, k, v)
+# 1. q、k、v
+# 添加三个nxk的矩阵, 用于计算self-attention的三个不同部分(q, k, v)
 # wij = qiT kj
 # wij = softmax(wij)
 # yi = \sum(wij * vj)
 
-# 2. 缩放点积
+# 2. Scaled-dot-product
 # 减小向量长度不一致对学习的影响
 
 # 3. Multi-head attention
@@ -43,54 +42,61 @@ print('y is \n', y)
 
 class SelfAttention(nn.Module):
     def __init__(self, emb, heads):
-        super().__init__()  # 用于访问父类的方法
-
-        self.emb = 3
-        self.heads = 1
+        super().__init__()  # 用于访问父类的init方法, 否则父类的init被当前init覆盖
+        self.emb = emb  # embedding feature dimension
+        self.heads = heads
         self.in_dim = emb
-        self.out_dim = emb * heads
+        self.out_dim = self.emb * self.heads  # compute all heads at once
 
-        self.l_queries = nn.Linear(self.in_dim, self.out_dim, bias=False)  # 线性层，将x变换到多头q k v
+        # compute all heads at once
+        # 线性层，将x变换到多头q k v
+        self.l_queries = nn.Linear(self.in_dim, self.out_dim, bias=False)
         self.l_keys = nn.Linear(self.in_dim, self.out_dim, bias=False)
         self.l_values = nn.Linear(self.in_dim, self.out_dim, bias=False)
 
+        # linear projection from multi heads to output
         self.unifyhead = nn.Linear(self.emb * self.heads, emb)
 
     def forward(self, x):
-        b, t, e = x.size()
-        h = self.heads
-        keys = self.l_keys(x).view(b, t, h, e)  # batch size,
-        queries = self.l_queries(x).view(b, t, h, e)
-        values = self.l_values(x).view(b, t, h, e)
+        b, n, k = x.size()  # batch, num_sample, feature dim. OK (1, N, 3) for points example
+        assert k == self.emb, 'Input dim mismatch!'
 
-        # - fold heads into the batch dimension
-        keys = keys.transpose(1, 2).contiguous().view(b * h, t, e)
-        queries = queries.transpose(1, 2).contiguous().view(b * h, t, e)
-        values = values.transpose(1, 2).contiguous().view(b * h, t, e)
+        h = self.heads
+        # parse multi-head: [b, n, k] to [b, n, h, k]  OK
+        keys = self.l_keys(x).view(b, n, h, k)  # batch, sample num, heads, feature dim
+        queries = self.l_queries(x).view(b, n, h, k)
+        values = self.l_values(x).view(b, n, h, k)
+
+        # compute scaled dot-product
+        # fold heads into the batch dimension
+        # why transpose?
+        keys = keys.transpose(1, 2).contiguous().view(b * h, n, k)
+        queries = queries.transpose(1, 2).contiguous().view(b * h, n, k)
+        values = values.transpose(1, 2).contiguous().view(b * h, n, k)
 
         # get dot product of queries and keys
         dot = torch.bmm(queries, keys.transpose(1, 2))
-        dot = dot / math.sqrt(e)
+        dot = dot / math.sqrt(k)  # Q*K^T / sqrt(k)
         dot = F.softmax(dot, dim=2)
 
-        out = torch.bmm(dot, values).view(b, h, t, e)
-        out = out.transpose(1, 2).contiguous().view(b, t, h * e)
+        out = torch.bmm(dot, values).view(b, h, n, k)
+        out = out.transpose(1, 2).contiguous().view(b, n, h * k)
 
         return self.unifyhead(out)
 
 
 # 将self-attention包装成可以复用的block
-# 这是一个transformer block
+# this is a transformer block
 class TransformerBlock(nn.Module):
     def __init__(self, emb, heads, ff_hidden_mult=4):
         super().__init__()
 
-        self.attention = SelfAttention(emb=emb, heads=heads)  # 实现单元之间的交互
+        self.attention = SelfAttention(emb=emb, heads=heads)  # self-attention实现单元之间的交互
 
-        self.norm1 = nn.LayerNorm(emb)
+        self.norm1 = nn.LayerNorm(emb)  # layer normalization
         self.norm2 = nn.LayerNorm(emb)
 
-        self.ff = nn.Sequential(
+        self.feed_forward = nn.Sequential(
             nn.Linear(emb, ff_hidden_mult * emb),
             nn.ReLU(),
             nn.Linear(ff_hidden_mult * emb, emb)
@@ -98,8 +104,15 @@ class TransformerBlock(nn.Module):
 
     def forward(self, x):
         attended = self.attention(x)  # attention
-        x = self.norm1(attended + x)  # layer norm & residual
-        fedforward = self.ff(x)  # MLP
-        x = self.norm2(fedforward + x)  # layer norm & residual
+        x = self.norm1(attended + x)  # add & layer norm
+        feedforward = self.feed_forward(x)  # MLP
+        x = self.norm2(feedforward + x)  # add & layer norm
 
         return x
+
+
+if __name__ == '__main__':
+    # classification using transformer
+    tb = TransformerBlock(emb=3, heads=1)
+
+    print()

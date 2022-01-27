@@ -12,7 +12,3 @@ a = np.array([[1, 2, 3],
 
 print(np.mean(a, axis=-1))  # diff channel
 
-
-def bn(in_data):
-    in_mean = np.mean(in_data)
-    return 0

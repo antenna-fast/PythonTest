@@ -46,7 +46,6 @@ def get_args_parser():
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
                         help='gradient clipping max norm')
 
-    # TODO: change it
     parser.add_argument('--gt_root_folder', default='/ssd/linchen/data/buc3.0/', type=str)
     parser.add_argument('--train_data_num', default=2000, type=int)
     parser.add_argument('--val_data_num', default=200, type=int)

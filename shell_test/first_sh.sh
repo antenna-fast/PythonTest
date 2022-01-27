@@ -1,11 +1,14 @@
-1.2
-3.4
+
 set -e
 set -x  # 显示指令 及其参数
 
 #!/bin/zsh
 # 约定的标记，它告诉系统这个脚本需要什么解释器来执行，即使用哪一种 Shell
 
+# 内置变量
+echo $(date)
+
+# 打印到窗口
 echo "Hello World !"  # echo 命令用于向窗口输出文本
 
 # 变量名外面加不加花括号都可以 最好加上，因为可以分清边界
@@ -20,18 +23,16 @@ echo "face_id is "${face}
 # 删除后不可以再使用，不可以删除只读变量
 unset face
 
-# for语句
-for skill in Ada Coffe Action Java; do
-  echo "I'm good at ${skill} Script"
-done
-
 # 字符串
 
-# 双引号
-your_name='yaohua'
-str="Hello, my name is \"${your_name}\" "
-echo ${str}
+# 单引号 / 双引号
+# 用于字符串出现空格时
+# 单引号：都是普通字符，即使是特殊字符也不具有特殊性
 
+your_name="yaohua"
+str="Hello, my name is \"${your_name}\" "
+echo "${str}"  # 输出是str的内容
+echo '${str}'  # 此时，输出是 ${str} 这是错误的
 
 # int to str
 a=123.456
@@ -50,25 +51,3 @@ echo 'len_single: '${#single}
 
 # 提取子字符串
 echo "${single:1:4}"
-
-# 字符串分割
-#test_str='1,2,3,4,5'
-test_str='/ssd/yaohualiu/data/buc3.0_feature_old_thres_full_vt/K11_wuhan_gg_20200615_3559_7.5.0/1min_batch_did_False_face_False_top30_with_st,/ssd/yaohualiu/data/buc3.0_feature_old_thres_full_vt/K11_wuhan_gg_20210523_3559_7.5.0/1min_batch_did_False_face_False_top30_with_st,/ssd/yaohualiu/data/buc3.0_feature_old_thres_full_vt/K11_wuhan_hk_20210523_3559_7.5.0/1min_batch_did_False_face_False_top30_with_st,/ssd/yaohualiu/data/buc3.0_feature_old_thres_full_vt/K11_guangzhou_artfull_20210614_3559_7.5.0/1min_batch_did_False_face_False_top30_with_st,/ssd/yaohualiu/data/buc3.0_feature_old_thres_full_vt/K11_guangzhou_artfull_20201230_7.5.0/1min_batch_did_False_face_False_top30_with_st,/ssd/yaohualiu/data/buc3.0_feature_old_thres_full_vt/GZCI_guangzhou_mowgz_20210701_3559_7.5.0/1min_batch_did_False_face_False_top30_with_st,/ssd/yaohualiu/data/buc3.0_feature_old_thres_full_vt/ZHDC_foshan_hyc_20201219_7.5.0_v16/1min_batch_did_False_face_False_top30_with_st,/ssd/yaohualiu/data/buc3.0_feature_old_thres_full_vt/ZHDC_foshan_hyc_20200625_3559_7.5.0/1min_batch_did_False_face_False_top30_with_st'
-
-OLD_IFS="${IFS}"
-IFS=","
-arr=($test_str)
-IFS="$OLD_IFS"
-
-len_val_data=${#arr[@]}
-echo 'len_val_data: ' "${len_val_data}"
-
-#for s in "${arr[@]}"
-#do
-#  echo "${s}"
-#done
-
-# 数组迭代
-for((i=0;i<len_val_data;i++)) do
-  echo "${i}" "${arr[i]}";
-done ;

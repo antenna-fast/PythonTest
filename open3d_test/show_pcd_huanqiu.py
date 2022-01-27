@@ -21,20 +21,25 @@ def show_pointcloud(pcd_path, is_mesh=1):
 
 
 if __name__ == '__main__':
-    ply_root = '/Users/aibee/Downloads/RemoteFile/SfmPly'
-    # pcd_path = os.path.join(ply_root, 'output_points.ply')
-    # pcd_path = os.path.join(ply_root, 'output_cameras.ply')
-    pcd_path = os.path.join(ply_root, 'output_office_points.ply')
-    # pcd_path = os.path.join(ply_root, 'output_office_cameras.ply')
+    root_path = '/Users/aibee/PycharmProjects/pythonProject/test/open3d_test'
 
-    # pcd_path = '/Users/aibee/Downloads/File/RemoteData/cloud_dense.ply'
+    # rgbd ch
+    # ch = 'ch05008'
+    # ch = 'ch05002'
 
-    # single frame
-    frameIdx = 0
-    pcd_path = '/Users/aibee/Downloads/File/RemoteData/PointCloudFrame/frame_{}.ply'.format(frameIdx)
+    # cropped
+    # ch = 'ch03010'
+    # ch = 'ch03014'
+    # ch = 'ch03016'
+    ch = 'ch04002'
+    # ch = 'ch04008'
 
-    # color map optimized
-    # pcd_path = '/Users/aibee/Downloads/File/RemoteData/scene/color_map_after_optimization_d_100_100.ply'
+    # pcd_path = os.path.join(root_path, 'pcd_file/ground_plane.ply')
+    # pcd_path = os.path.join(root_path, 'pcd_file/1F-crop.ply')
+    # pcd_path = os.path.join(root_path, 'pcd_file/1F-crop_mesh.ply')
+    # pcd_path = os.path.join(root_path, 'pcd_file/ground_plane_mesh.ply')
 
-    # colmap
+    # pcd_path = os.path.join(root_path, 'pcd_file', ch, 'rgbd_point_cloud.ply')
+    pcd_path = os.path.join(root_path, 'pcd_file', ch, 'pcd_whole.ply')
+
     show_pointcloud(pcd_path=pcd_path, is_mesh=0)

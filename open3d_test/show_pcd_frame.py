@@ -4,7 +4,7 @@ import open3d as o3d
 
 
 def show_pointcloud(pcd_path, is_mesh=1):
-    print("Load a ply point cloud, print it, and render it")
+    print("Load a ply point cloud, print it, and render it ... ")
     if is_mesh:
         pcd = o3d.io.read_triangle_mesh(pcd_path)
     else:
@@ -21,20 +21,8 @@ def show_pointcloud(pcd_path, is_mesh=1):
 
 
 if __name__ == '__main__':
-    ply_root = '/Users/aibee/Downloads/RemoteFile/SfmPly'
-    # pcd_path = os.path.join(ply_root, 'output_points.ply')
-    # pcd_path = os.path.join(ply_root, 'output_cameras.ply')
-    pcd_path = os.path.join(ply_root, 'output_office_points.ply')
-    # pcd_path = os.path.join(ply_root, 'output_office_cameras.ply')
-
-    # pcd_path = '/Users/aibee/Downloads/File/RemoteData/cloud_dense.ply'
-
     # single frame
     frameIdx = 0
     pcd_path = '/Users/aibee/Downloads/File/RemoteData/PointCloudFrame/frame_{}.ply'.format(frameIdx)
 
-    # color map optimized
-    # pcd_path = '/Users/aibee/Downloads/File/RemoteData/scene/color_map_after_optimization_d_100_100.ply'
-
-    # colmap
     show_pointcloud(pcd_path=pcd_path, is_mesh=0)

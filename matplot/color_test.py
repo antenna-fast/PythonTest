@@ -23,13 +23,12 @@ gradient = np.linspace(0, 1, 256)
 gradient = np.vstack((gradient, gradient))
 
 
-def plot_color_gradients(cmap_category, cmap_list):vvv
+def plot_color_gradients(cmap_category, cmap_list):
     # Create figure and adjust figure height to number of colormapsvvv
-    nrows = len(cmap_list)vvv
+    nrows = len(cmap_list)
     figh = 0.35 + 0.15 + (nrows + (nrows - 1) * 0.1) * 0.22
     fig, axs = plt.subplots(nrows=nrows + 1, figsize=(6.4, figh))
-    fig.subplots_adjust(top=1 - 0.35 / figh, bottom=0.15 / figh,
-                        left=0.2, right=0.99)
+    fig.subplots_adjust(top=1 - 0.35 / figh, bottom=0.15 / figh, left=0.2, right=0.99)
     axs[0].set_title(cmap_category + ' colormaps', fontsize=14)
 
     for ax, name, i in zip(axs, cmap_list, [i for i in range(100)]):

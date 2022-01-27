@@ -12,6 +12,7 @@ class TestClass(object):
         # __私有成员__, 只有类对象自己能访问，子类也不行
         self.__var__ = 1
 
+
 t = TestClass()
 print(t._var)
 

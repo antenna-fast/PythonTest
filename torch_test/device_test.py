@@ -13,7 +13,7 @@ from torch.utils.data import Dataset, DataLoader
 # print('device is ', device)  # cuda:0
 
 
-# # 单机多卡
+# 单机多卡
 gpu_id = "1, 2, 3, 4"
 os.environ['CUDA_VISIBLE_DEVICES'] = gpu_id  # need to specify at first
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -37,7 +37,6 @@ data_size = 100
 
 
 class RandomDataset(Dataset):
-
     def __init__(self, size, length):
         self.len = length
         self.data = torch.randn(length, size)
